@@ -10,8 +10,8 @@ let createNewUser = async (data) => {
             await db.User.create({
                 email: data.email,
                 password: hashPasswordFromBcrypt,
-                firstName: data.firstname,
-                lastName: data.lastname,
+                firstName: data.firstName,
+                lastName: data.lastName,
                 address: data.address,
                 phoneNumber: data.phonenumber,
                 gender: data.gender === '1' ? true : false,
@@ -74,8 +74,8 @@ let updateUserData = (data) => {
             })
 
             if (user) {
-                user.firstName = data.firstname
-                user.lastName = data.lastname
+                user.firstName = data.firstName
+                user.lastName = data.lastName
                 user.address = data.address
                 await user.save()
                 let allUsers = await db.User.findAll()
