@@ -18,7 +18,7 @@ let userHandleLogin = (email, password) => {
             let isExist = await checkUserEmail(email)
             if (isExist) {
                 let user = await db.User.findOne({
-                    attributes: ['email', 'password', 'roleId'],
+                    attributes: ['email', 'password', 'roleId', 'firstName', 'lastName'],
                     where: { email: email },
                     raw: true
                 })
@@ -109,10 +109,13 @@ let createNewUser = (data) => {
                     firstName: data.firstName,
                     lastName: data.lastName,
                     address: data.address,
-                    phoneNumber: data.phonenumber,
-                    gender: data.gender === '1' ? true : false,
-                    // image: data.image,
+                    phoneNumber: data.phoneNumber,
+                    gender: data.gender,
                     roleId: data.roleId,
+                    positionId: data.positionId,
+                    image: data.avatar,
+
+                    // data. (key của state bên react)
                 })
 
                 resolve({
@@ -155,7 +158,7 @@ let deleteUser = (userId) => {
 let updateUserData = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.id) {
+            if (!data.id || !data.roleId || !data.gender || !data.positionId) {
                 resolve({
                     errCode: 2,
                     errMessage: 'Missing param'
@@ -171,6 +174,16 @@ let updateUserData = (data) => {
                 user.firstName = data.firstName
                 user.lastName = data.lastName
                 user.address = data.address
+                user.phoneNumber = data.phoneNumber
+                user.positionId = data.positionId
+                user.gender = data.gender
+                user.roleId = data.roleId
+
+                if (data.avatar) {
+
+                    user.image = data.avatar
+                }
+
                 await user.save()
                 resolve({
                     errCode: 0,
@@ -188,10 +201,37 @@ let updateUserData = (data) => {
     })
 }
 
+let getAllCodeService = (typeInput) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!typeInput) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required params'
+                })
+            } else {
+
+                let res = {};
+                let allcode = await db.Allcode.findAll({
+                    where: {
+                        type: typeInput
+                    }
+                });
+                res.errCode = 0;
+                res.data = allcode;
+                resolve(res)
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     userHandleLogin: userHandleLogin,
     getAllUsers: getAllUsers,
     createNewUser: createNewUser,
     deleteUser: deleteUser,
     updateUserData: updateUserData,
+    getAllCodeService: getAllCodeService,
 }
