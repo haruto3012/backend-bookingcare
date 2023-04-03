@@ -17,10 +17,12 @@ let getTopDoctorService = (limitInput) => {
                 include: [
                     { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
                     { model: db.Allcode, as: 'genderData', attributes: ['valueEn', 'valueVi'] },
+
                 ],
                 raw: true,
                 nest: true
             })
+
             resolve({
                 errCode: 0,
                 data: users
@@ -51,17 +53,33 @@ let getAllDoctorsService = () => {
     })
 }
 
+let checkRequiredFields = (inputData) => {
+    let arrFields = ['doctorId', 'contentHTML', 'contentMarkdown',
+        'action', 'selectedPrice', 'selectedPayment',
+        'selectedProvince', 'nameClinic', 'addressClinic',
+        'note', 'specialtyId']
+    let isValid = true
+    let element = ''
+    for (let i = 0; i < arrFields.length; i++) {
+        if (!inputData[arrFields[i]]) {
+            isValid = false;
+            element = arrFields[i]
+            break;
+        }
+    }
+
+    return { isValid, element }
+}
+
 let saveInforDoctorsService = (inputData) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!inputData.doctorId || !inputData.contentHTML
-                || !inputData.contentMarkdown || !inputData.action
-                || !inputData.selectedPrice || !inputData.selectedPayment
-                || !inputData.selectedProvince || !inputData.nameClinic
-                || !inputData.addressClinic || !inputData.note) {
+
+            let checkObj = checkRequiredFields(inputData)
+            if (checkObj.isValid === false) {
                 resolve({
-                    errCode: -1,
-                    errMessage: 'Missing params'
+                    errCode: 1,
+                    errMessage: `Missing params: ${checkObj.element}`
                 })
             } else {
                 //upsert Mardown
@@ -104,6 +122,8 @@ let saveInforDoctorsService = (inputData) => {
                         doctorInfor.nameClinic = inputData.nameClinic,
                         doctorInfor.addressClinic = inputData.addressClinic,
                         doctorInfor.note = inputData.note,
+                        doctorInfor.specialtyId = inputData.specialtyId,
+                        doctorInfor.clinicId = inputData.clinicId,
                         await doctorInfor.save()
                 } else {
                     //create
@@ -115,6 +135,8 @@ let saveInforDoctorsService = (inputData) => {
                         nameClinic: inputData.nameClinic,
                         addressClinic: inputData.addressClinic,
                         note: inputData.note,
+                        specialtyId: inputData.specialtyId,
+                        clinicId: inputData.clinicId
                     })
                 }
 
@@ -254,6 +276,8 @@ let getScheduleByDateService = (doctorId, date) => {
                     },
                     include: [
                         { model: db.Allcode, as: 'timeTypeData', attributes: ['valueEn', 'valueVi'] },
+
+                        { model: db.User, as: 'doctorData', attributes: ['firstName', 'lastName'] },
                     ],
                     raw: false,
                     nest: true
