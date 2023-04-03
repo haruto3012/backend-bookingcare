@@ -274,6 +274,104 @@ let getScheduleByDateService = (doctorId, date) => {
     })
 }
 
+let getExtraInforDoctorByIdService = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required params'
+                })
+            } else {
+                let data = await db.Doctor_Infor.findOne({
+                    where: {
+                        doctorId: doctorId
+                    },
+                    attributes: {
+                        exclude: ['id', 'doctorId']
+                    },
+                    include: [
+                        { model: db.Allcode, as: 'priceTypeData', attributes: ['valueEn', 'valueVi'] },
+                        { model: db.Allcode, as: 'paymentTypeData', attributes: ['valueEn', 'valueVi'] },
+                        { model: db.Allcode, as: 'provinceTypeData', attributes: ['valueEn', 'valueVi'] },
+                    ],
+                    raw: false,
+                    nest: true
+                })
+
+                if (!data) {
+                    data = {}
+                }
+                resolve({
+                    errCode: 0,
+                    data: data
+                })
+            }
+        } catch (e) {
+            reject(e)
+
+        }
+    })
+}
+
+let getProfileInforDoctorByIdService = (doctorId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required params'
+                })
+            } else {
+                let dataa = await db.User.findOne({
+                    where: {
+                        id: doctorId
+                    },
+                    attributes: {
+                        exclude: ['password']
+                    },
+                    include: [
+                        {
+                            model: db.Markdown,
+                            attributes: ['description',
+                                // 'contentHTML', 'contentMarkdown'
+                            ]
+                        },
+                        {
+                            model: db.Doctor_Infor,
+                            attributes: {
+                                exclude: ['id', 'doctorId']
+                            },
+                            include: [
+                                { model: db.Allcode, as: 'priceTypeData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'paymentTypeData', attributes: ['valueEn', 'valueVi'] },
+                                { model: db.Allcode, as: 'provinceTypeData', attributes: ['valueEn', 'valueVi'] },
+                            ]
+                        },
+                        { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+                    ],
+                    raw: false,
+                    nest: true
+                })
+
+                if (dataa && dataa.image) {
+                    dataa.image = new Buffer(dataa.image, 'base64').toString('binary')
+                } else {
+                    dataa = {}
+                }
+                resolve({
+                    errCode: 0,
+                    data: dataa
+                })
+            }
+
+        } catch (e) {
+            reject(e)
+
+        }
+    })
+}
+
 module.exports = {
     getTopDoctorService: getTopDoctorService,
     getAllDoctorsService: getAllDoctorsService,
@@ -281,4 +379,6 @@ module.exports = {
     getDetailDoctorByIdService: getDetailDoctorByIdService,
     bulkCreateScheduleService: bulkCreateScheduleService,
     getScheduleByDateService: getScheduleByDateService,
+    getExtraInforDoctorByIdService: getExtraInforDoctorByIdService,
+    getProfileInforDoctorByIdService: getProfileInforDoctorByIdService,
 }
