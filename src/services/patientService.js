@@ -12,7 +12,10 @@ let buildUrlEmail = (doctorId, token) => {
 let postBookAppointmentService = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.email || !data.doctorId || !data.timeType || !data.date || !data.fullName) {
+            if (!data.email || !data.doctorId || !data.timeType ||
+                !data.date || !data.selectedGender || !data.fullName ||
+                !data.address
+            ) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required params'
@@ -33,9 +36,12 @@ let postBookAppointmentService = (data) => {
                 //upert patient
                 let user = await db.User.findOrCreate({
                     where: { email: data.email },
-                    default: {
+                    defaults: {
                         email: data.email,
-                        roleId: 'R3'
+                        roleId: 'R3',
+                        address: data.address,
+                        gender: data.selectedGender,
+                        firstName: data.fullName
                     },
                     raw: false
                 })
