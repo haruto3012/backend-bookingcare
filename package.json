@@ -13,7 +13,7 @@
     "express",
     "hoiDanIT"
   ],
-  "author": "Eric HoiDanIT",
+  "author": "Haruto",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
